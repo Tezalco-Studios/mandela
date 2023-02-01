@@ -7,6 +7,7 @@ TagManager:
   - Wall
   - Box
   - Conveyor
+  - Crate
   layers:
   - Default
   - TransparentFX

@@ -26,12 +26,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float sprintSpeed = 8f;
 
-    [Header("Look parameters")]
-    [SerializeField] private float lookSpeedX = 2.0f;
-    [SerializeField] private float lookSpeedY = 2f;
-    [SerializeField] private float upperLookLimit = 80f;
-    [SerializeField] private float lowerLookLimit = 80f;
-
     [Header("Jump parameters")]
     [SerializeField] private float jumpForce = 8f;
     [SerializeField] private float gravity = 30f;
@@ -70,7 +64,6 @@ public class PlayerController : MonoBehaviour
         if (CanMove)
         {
             HandleMovementInput();
-            HandleMouseLook();
             if(canJump) HandleJump();
             if (canUseHeadBob) HandleHeadBob();
             ApplyFinalMovements();
@@ -83,14 +76,6 @@ public class PlayerController : MonoBehaviour
         float moveDirectionY = moveDirection.y;
         moveDirection = (transform.TransformDirection(Vector3.forward) * currentInput.x) + (transform.TransformDirection(Vector3.right) * currentInput.y);
         moveDirection.y = moveDirectionY;
-    }
-
-    private void HandleMouseLook()
-    {
-        rotationX -= Input.GetAxis("Mouse Y") * lookSpeedY;
-        rotationX = Mathf.Clamp(rotationX, -upperLookLimit, lowerLookLimit);
-        playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-        transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeedX, 0);
     }
         
     private void HandleJump()
