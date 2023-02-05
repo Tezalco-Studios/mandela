@@ -17,10 +17,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool canSprint = true;
     [SerializeField] private bool canJump = true;
     [SerializeField] private bool canUseHeadBob = true;
+    [SerializeField] private bool canInteract = true;
 
     [Header("Controls")]
     [SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
+    [SerializeField] private KeyCode interactKey = KeyCode.E;
 
     [Header("Movement parameters")]
     [SerializeField] private float walkSpeed = 4f;
@@ -44,7 +46,11 @@ public class PlayerController : MonoBehaviour
     private Vector3 moveDirection;
     private Vector2 currentInput;
 
-    private float rotationX = 0f;
+    [Header("Interaction")]
+    [SerializeField] private Vector3 interactionWayPoint = new Vector3(0.5f, 0.5f, 0);
+    [SerializeField] private float interactionDistance = 10f;
+    [SerializeField] private LayerMask interactionLayer = 7;
+    private Interactable currentInteractable;
 
 
     private void Awake()
@@ -67,6 +73,12 @@ public class PlayerController : MonoBehaviour
             if(canJump) HandleJump();
             if (canUseHeadBob) HandleHeadBob();
             ApplyFinalMovements();
+
+            if (canInteract)
+            {
+                HandleInteractionCheck();
+                HandleInteractionInput();
+            } 
         }
     }
 
@@ -94,15 +106,51 @@ public class PlayerController : MonoBehaviour
             timer += Time.deltaTime * (IsSprinting ? sprintBobSpeed : walkBobSpeed);
             // Local pos
             playerCamera.transform.localPosition = new Vector3( // Move Camera up and down
-                playerCamera.transform.localPosition.x, // Camera's local position X
-                defaultYPos + Mathf.Sin(timer) * (IsSprinting ? sprintBobAmount : walkBobAmount), // change y pos based on state
-                playerCamera.transform.localPosition.z); // Camera's local position Y
+            playerCamera.transform.localPosition.x, // Camera's local position X
+            defaultYPos + Mathf.Sin(timer) * (IsSprinting ? sprintBobAmount : walkBobAmount), // change y pos based on state
+            playerCamera.transform.localPosition.z); // Camera's local position Y
         }
     }
 
     private void ApplyFinalMovements()
     {
-        if (!characterController.isGrounded) moveDirection.y -= gravity * Time.deltaTime;
+        if (!characterController.isGrounded) 
+            moveDirection.y -= gravity * Time.deltaTime;
         characterController.Move(moveDirection * Time.deltaTime);
+    }
+
+    private void HandleInteractionCheck()
+    {
+        
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, 10f))
+        {
+            //Debug.Log(hit.collider.name);
+            if(hit.collider.gameObject.layer == 7 && (currentInteractable == null || hit.collider.gameObject.GetInstanceID() != currentInteractable.GetInstanceID()))
+            {
+                hit.collider.TryGetComponent<Interactable>(out currentInteractable);
+
+                //Debug.Log("Reached");
+
+                if (currentInteractable)
+                {
+                    //Debug.Log("after reached");
+                    currentInteractable.OnFocus();
+                }
+                    
+
+
+            }
+        }else if (currentInteractable)
+        {
+            //Debug.Log("Not hit");
+            currentInteractable.OnLoseFocus();
+            currentInteractable = null;
+        }
+    }
+
+    private void HandleInteractionInput()
+    {
+        if(Input.GetKeyDown(interactKey) && currentInteractable != null && Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, interactionDistance, interactionLayer))
+            currentInteractable.OnInteract();
     }
 }

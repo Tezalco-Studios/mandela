@@ -15,6 +15,8 @@ public class BoxGen : MonoBehaviour
     public Tuple<string, float> DRad { get; private set; }
     public Tuple<string, float> HighestRad { get; private set; }
 
+    public List<int> finalCombination = new List<int>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,10 +33,10 @@ public class BoxGen : MonoBehaviour
             : new Tuple<string, float>("D", DRad.Item2);
 
         //SimonSays = SimonSays.Select(x => new { value = x, order = rand.Next() }).OrderBy(x => x.order).Select(x => x.value).ToList();
-        var newList = SimonSays.OrderBy(x => rand.Next()).ToList();
+        finalCombination = SimonSays.OrderBy(x => rand.Next()).ToList();
 
         Debug.Log("///// Simon Says values /////");
-        for (int i = 0; i < newList.Count; i++) Debug.Log(newList[i]);
+        for (int i = 0; i < finalCombination.Count; i++) Debug.Log(finalCombination[i]);
     }
 
     /// <summary>
