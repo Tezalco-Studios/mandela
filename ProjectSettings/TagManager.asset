@@ -8,6 +8,8 @@ TagManager:
   - Box
   - Conveyor
   - Crate
+  - TITLEconveyor
+  - TITLEcrate
   layers:
   - Default
   - TransparentFX
